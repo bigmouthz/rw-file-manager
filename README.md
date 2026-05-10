@@ -24,12 +24,12 @@ A beautiful desktop file manager built with Electron + React + TypeScript, inspi
 
 ### One-click install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/bigmouthz/rw-file-manager/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/river-wit/rw-file-manager/main/install.sh | bash
 ```
 
 Or manually:
 
-1. Download the latest release from [Releases](https://github.com/bigmouthz/rw-file-manager/releases)
+1. Download the latest release from [Releases](https://github.com/river-wit/rw-file-manager/releases)
 2. Drag `RW File Manager.app` to your Applications folder
 3. Open it!
 

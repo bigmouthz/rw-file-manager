@@ -1084,6 +1084,86 @@ input {
   background: var(--bg-hover);
 }
 
+/* ============================================
+   个人收藏
+   ============================================ */
+.favorites {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+}
+
+.favorites-drop-area {
+  min-height: 30px;
+}
+
+.favorites-drop-area.drag-over {
+  background: rgba(0, 113, 227, 0.15);
+  outline: 2px dashed var(--text-link);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+.favorites-empty {
+  padding: 8px 14px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.favorite-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-primary);
+  transition: background var(--transition);
+}
+
+.favorite-item.selected {
+  background: var(--bg-selected);
+  color: var(--text-inverse);
+}
+
+.favorite-item:hover:not(.selected) {
+  background: var(--bg-hover);
+}
+
+.favorite-icon {
+  font-size: 12px;
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+}
+
+.favorite-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.favorite-remove {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  opacity: 0;
+  transition: opacity var(--transition);
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.favorite-item:hover .favorite-remove {
+  opacity: 0.6;
+}
+
+.favorite-remove:hover {
+  color: #ff3b30;
+  opacity: 1;
+}
+
 .quick-access-item.selected {
   background: var(--bg-selected);
   color: var(--text-inverse);

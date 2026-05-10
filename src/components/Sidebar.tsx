@@ -4,6 +4,11 @@ import type { FileEntry } from '../types';
 import { getRoots } from '../utils/fileSystem';
 import { DirectoryTree } from './DirectoryTree';
 
+interface Bookmark {
+  path: string;
+  name: string;
+}
+
 interface SidebarProps {
   currentPath: string;
   onNavigate: (path: string) => void;
@@ -13,10 +18,35 @@ interface SidebarProps {
   style?: CSSProperties;
 }
 
+const STORAGE_KEY = 'filemanager-favorites';
+
 export function Sidebar({ currentPath, onNavigate, onTreeContextMenu, onDropFile, treeRefreshKey, style }: SidebarProps) {
   const [roots, setRoots] = useState<FileEntry[]>([]);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+  const [favorites, setFavorites] = useState<Bookmark[]>([]);
+  const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // 从 localStorage 加载收藏
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        setFavorites(JSON.parse(saved));
+      }
+    } catch (err) {
+      console.error('Failed to load favorites:', err);
+    }
+  }, []);
+
+  // 保存收藏到 localStorage
+  const saveFavorites = useCallback((newFavorites: Bookmark[]) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newFavorites));
+    } catch (err) {
+      console.error('Failed to save favorites:', err);
+    }
+  }, []);
 
   // 加载根目录
   useEffect(() => {
@@ -48,6 +78,54 @@ export function Sidebar({ currentPath, onNavigate, onTreeContextMenu, onDropFile
       }
       return next;
     });
+  }, []);
+
+  // 添加收藏
+  const addFavorite = useCallback((path: string, name: string) => {
+    setFavorites(prev => {
+      // 检查是否已存在
+      if (prev.some(f => f.path === path)) {
+        return prev;
+      }
+      const newFavorites = [...prev, { path, name }];
+      saveFavorites(newFavorites);
+      return newFavorites;
+    });
+  }, [saveFavorites]);
+
+  // 移除收藏
+  const removeFavorite = useCallback((path: string) => {
+    setFavorites(prev => {
+      const newFavorites = prev.filter(f => f.path !== path);
+      saveFavorites(newFavorites);
+      return newFavorites;
+    });
+  }, [saveFavorites]);
+
+  // 处理拖拽放下
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+    
+    const sourcePath = e.dataTransfer.getData('text/plain');
+    if (!sourcePath) return;
+    
+    // 获取文件夹名称（从路径提取）
+    const name = sourcePath.split('/').filter(Boolean).pop() || sourcePath;
+    addFavorite(sourcePath, name);
+  }, [addFavorite]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
   }, []);
 
   // 从 roots 中查找 home 路径
@@ -87,6 +165,41 @@ export function Sidebar({ currentPath, onNavigate, onTreeContextMenu, onDropFile
           ))}
         </div>
       )}
+      
+      {/* 个人收藏 */}
+      <div className="favorites">
+        <div className="sidebar-title">个人收藏</div>
+        <div
+          className={`favorites-drop-area ${dragOver ? 'drag-over' : ''}`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+        >
+          {favorites.length === 0 ? (
+            <div className="favorites-empty">拖拽目录到这里添加收藏</div>
+          ) : (
+            favorites.map(item => (
+              <div
+                key={item.path}
+                className={`favorite-item ${currentPath === item.path ? 'selected' : ''}`}
+                onClick={() => onNavigate(item.path)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (confirm(`移除收藏 "${item.name}"?`)) {
+                    removeFavorite(item.path);
+                  }
+                }}
+              >
+                <span className="favorite-icon">⭐</span>
+                <span className="favorite-name">{item.name}</span>
+                <span className="favorite-remove" title="右键点击移除">✕</span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
       <div className="sidebar-title">目录树</div>
       <div className="sidebar-tree">
         {loading ? (
