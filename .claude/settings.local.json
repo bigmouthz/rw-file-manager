@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk tsc *)",
+      "Bash(rtk npx *)",
+      "Bash(./node_modules/.bin/vite build *)",
+      "Bash(rtk git *)",
+      "Bash(rtk diff *)"
+    ]
+  }
+}
